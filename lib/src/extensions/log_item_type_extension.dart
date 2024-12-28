@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../data/log_item_type.dart';
 
+///Provides extension methods on LogItemType
 extension LogItemTypeExtension on LogItemType {
+  ///returns the color of the log item according to it's type
   Color get itemColorByType {
     switch (this) {
       case LogItemType.info:

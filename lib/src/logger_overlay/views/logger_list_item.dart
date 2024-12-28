@@ -1,44 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../data/log_item_model.dart';
 import '../../extensions/date_extension.dart';
 import '../../extensions/log_item_type_extension.dart';
-import 'logger_icon.dart';
 import '../controllers/logger_overlay_controller.dart';
 
+/// Represents a single log item in the logger overlay list.
 class LoggerListItem extends StatelessWidget {
-  final LoggerOverlayController controller = Get.find();
+  final LoggerOverlayController _controller = Get.find();
+  ///item index
   final int index;
 
+  /// Creates a logger list item with the given index.
   LoggerListItem({
     super.key,
     required this.index,
   });
 
+  /// Builds the main widget for a single log item.
+  /// Displays an expandable container with a header and body.
   @override
   Widget build(BuildContext context) {
-    final LogItem currentItem = controller.debugItems[index];
+    final LogItem currentItem = _controller.logItems[index];
     final Color itemColor = currentItem.type.itemColorByType;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: itemColor,
-          ),
+          borderRadius: BorderRadius.circular(8), // Rounded corners.
+          border:
+              Border.all(color: itemColor), // Border color based on log type.
         ),
         child: Column(
           children: [
             _buildHeader(currentItem, itemColor),
+            // Header with title and index.
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Obx(
                 () => AnimatedCrossFade(
-                  crossFadeState: controller.debugItemsExpansionState[index]
-                      ? CrossFadeState.showFirst
-                      : CrossFadeState.showSecond,
+                  crossFadeState: _controller.logItemsExpansionState[index]
+                      ? CrossFadeState.showFirst // Expanded state.
+                      : CrossFadeState.showSecond, // Collapsed state.
                   duration: const Duration(milliseconds: 200),
                   firstChild:
                       _buildExpandedItemBody(index, currentItem, itemColor),
@@ -53,6 +58,8 @@ class LoggerListItem extends StatelessWidget {
     );
   }
 
+  /// Builds the header for a log item.
+  /// Displays the title and the log item index with a colored badge.
   Widget _buildHeader(LogItem currentItem, Color itemColor) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -61,14 +68,16 @@ class LoggerListItem extends StatelessWidget {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              currentItem.title,
-              style: TextStyle(
-                color: itemColor,
-                fontWeight: FontWeight.w900,
-                fontSize: 18,
-              ),
-            ),
+            child: currentItem.title != null
+                ? Text(
+                    currentItem.title!,
+                    style: TextStyle(
+                      color: itemColor, // Title color based on log type.
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                    ),
+                  )
+                : Container(),
           ),
         ),
         ClipRRect(
@@ -77,14 +86,14 @@ class LoggerListItem extends StatelessWidget {
             bottomLeft: Radius.circular(7),
           ),
           child: Container(
-            color: itemColor,
+            color: itemColor, // Badge background color.
             height: 20,
             width: 20,
             child: Center(
               child: FittedBox(
                 fit: BoxFit.contain,
                 child: Text(
-                  (index + 1).toString(),
+                  (index + 1).toString(), // Display log item index.
                   style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -98,42 +107,42 @@ class LoggerListItem extends StatelessWidget {
     );
   }
 
+  /// Builds the collapsed view of the log item's body.
+  /// Shows a truncated description of the log.
   Widget _buildCollapsedItemBody(
       int index, LogItem currentItem, Color itemColor) {
     return GestureDetector(
-      onTap: () => controller.toggleItemExpansion(index),
+      onTap: () => _controller.toggleItemExpansion(index), // Toggle expansion.
       child: Text(
         currentItem.description,
         maxLines: 5,
-        style: TextStyle(color: itemColor),
+        style: TextStyle(color: itemColor), // Text color based on log type.
       ),
     );
   }
 
+  /// Builds the expanded view of the log item's body.
+  /// Shows the full description, timestamp, and a copy icon.
   Widget _buildExpandedItemBody(
       int index, LogItem currentItem, Color itemColor) {
     return GestureDetector(
-      onTap: () => controller.toggleItemExpansion(index),
+      onTap: () => _controller.toggleItemExpansion(index), // Toggle expansion.
       child: Column(
         children: [
           Text(
-            currentItem.description,
+            currentItem.description, // Full log description.
             style: TextStyle(color: itemColor),
           ),
-          const SizedBox(
-            height: 16,
-          ),
+          const SizedBox(height: 16),
           Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                currentItem.time.getDateTimeAsDebuggingString(),
-                style: TextStyle(
-                  color: itemColor,
-                ),
+                currentItem.time.getDateTimeAsLoggingString(), // Log timestamp.
+                style: TextStyle(color: itemColor),
               ),
-              _buildCopyIcon(currentItem)
+              _buildCopyIcon(currentItem), // Copy log info icon.
             ],
           ),
         ],
@@ -141,14 +150,15 @@ class LoggerListItem extends StatelessWidget {
     );
   }
 
+  /// Builds a copy icon to copy the log item's details.
   Widget _buildCopyIcon(LogItem currentItem) {
     return GestureDetector(
-      onTap: () => controller.copyErrorInfo(currentItem),
-      child: LoggerIcon(
-        assetPath: 'packages/flutter_onscreen_logger/lib/assets/ic_copy.svg',
-        height: 20,
-        width: 20,
+      onTap: () => _controller.copyErrorInfo(currentItem), // Copy log info.
+      child: Icon(
+        Icons.copy_rounded,
         color: currentItem.type.itemColorByType,
+        // Icon color based on log type.
+        size: 20,
       ),
     );
   }
