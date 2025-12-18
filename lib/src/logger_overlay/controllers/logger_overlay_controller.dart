@@ -109,8 +109,11 @@ class LoggerOverlayController extends GetxController {
     await file.writeAsString(fileContent); // Write content to the file.
 
     if (await file.exists()) {
-      await Share.shareXFiles([XFile(filePath)],
-          text: "Here's the log report!");
+      await Share.shareXFiles(
+        [XFile(filePath)],
+        text: "Here's the log report!",
+        sharePositionOrigin: Rect.fromLTWH(0, 0, 100, 100),
+      );
     }
   }
 
